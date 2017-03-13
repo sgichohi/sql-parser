@@ -19,4 +19,5 @@ const (
 	// Keywords
 	SELECT
 	FROM
+	LIMIT
 )

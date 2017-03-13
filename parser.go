@@ -3,12 +3,14 @@ package sql
 import (
 	"fmt"
 	"io"
+	"strconv"
 )
 
 // SelectStatement represents a SQL SELECT statement.
 type SelectStatement struct {
 	Fields    []string
 	TableName string
+	Limit     int
 }
 
 // Parser represents a parser.
@@ -28,7 +30,7 @@ func NewParser(r io.Reader) *Parser {
 
 // Parse parses a SQL SELECT statement.
 func (p *Parser) Parse() (*SelectStatement, error) {
-	stmt := &SelectStatement{}
+	stmt := &SelectStatement{Limit: -1}
 
 	// First token should be a "SELECT" keyword.
 	if tok, lit := p.scanIgnoreWhitespace(); tok != SELECT {
@@ -62,6 +64,17 @@ func (p *Parser) Parse() (*SelectStatement, error) {
 		return nil, fmt.Errorf("found %q, expected table name", lit)
 	}
 	stmt.TableName = lit
+
+	tok, lit = p.scanIgnoreWhitespace()
+	if tok == LIMIT {
+		t, l := p.scanIgnoreWhitespace()
+		if t != IDENT && !SDigit(l) {
+			return nil, fmt.Errorf("found %q, expected digit", l)
+		} else {
+			stmt.Limit, _ = strconv.Atoi(string(l))
+		}
+
+	}
 
 	// Return the successfully parsed statement.
 	return stmt, nil

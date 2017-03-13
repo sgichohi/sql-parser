@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"strconv"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 	if isWhitespace(ch) {
 		s.unread()
 		return s.scanWhitespace()
-	} else if isLetter(ch) {
+	} else if isLetter(ch) || isDigit(ch) {
 		s.unread()
 		return s.scanIdent()
 	}
@@ -93,6 +94,8 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 		return SELECT, buf.String()
 	case "FROM":
 		return FROM, buf.String()
+	case "LIMIT":
+		return LIMIT, buf.String()
 	}
 
 	// Otherwise return as a regular identifier.
@@ -120,6 +123,11 @@ func isLetter(ch rune) bool { return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && c
 
 // isDigit returns true if the rune is a digit.
 func isDigit(ch rune) bool { return (ch >= '0' && ch <= '9') }
+
+func SDigit(str string) bool {
+	_, err := strconv.Atoi(str)
+	return err == nil
+}
 
 // eof represents a marker rune for the end of the reader.
 var eof = rune(0)

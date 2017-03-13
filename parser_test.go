@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/benbjohnson/sql-parser"
+	"github.com/sgichohi/sql-parser"
 )
 
 // Ensure the parser can parse strings into Statement ASTs.
@@ -17,10 +17,11 @@ func TestParser_ParseStatement(t *testing.T) {
 	}{
 		// Single field statement
 		{
-			s: `SELECT name FROM tbl`,
+			s: `SELECT name FROM tbl limit 1`,
 			stmt: &sql.SelectStatement{
 				Fields:    []string{"name"},
 				TableName: "tbl",
+				Limit:     1,
 			},
 		},
 
@@ -30,15 +31,17 @@ func TestParser_ParseStatement(t *testing.T) {
 			stmt: &sql.SelectStatement{
 				Fields:    []string{"first_name", "last_name", "age"},
 				TableName: "my_table",
+				Limit:     -1,
 			},
 		},
 
 		// Select all statement
 		{
-			s: `SELECT * FROM my_table`,
+			s: `SELECT * FROM my_table limit 140`,
 			stmt: &sql.SelectStatement{
 				Fields:    []string{"*"},
 				TableName: "my_table",
+				Limit:     140,
 			},
 		},
 
@@ -46,6 +49,7 @@ func TestParser_ParseStatement(t *testing.T) {
 		{s: `foo`, err: `found "foo", expected SELECT`},
 		{s: `SELECT !`, err: `found "!", expected field`},
 		{s: `SELECT field xxx`, err: `found "xxx", expected FROM`},
+		{s: `SELECT field FROM sorbo limit rumit`, err: `found rumit, expected digit`},
 		{s: `SELECT field FROM *`, err: `found "*", expected table name`},
 	}
 
